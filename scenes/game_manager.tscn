@@ -1,0 +1,137 @@
+[gd_scene load_steps=4 format=3 uid="uid://c5h8k2nap3r6v"]
+
+[ext_resource type="Script" uid="uid://d6i9l3n0q4s7w" path="res://scripts/wave_manager.gd" id="1_wave"]
+[ext_resource type="PackedScene" uid="uid://bqm8x7y4n5k2p" path="res://scenes/health_bar.tscn" id="2_health"]
+[ext_resource type="PackedScene" uid="uid://j42bi4d38xwg" path="res://scenes/enemy.tscn" id="3_enemy"]
+
+[node name="GameManager" type="Node"]
+
+[node name="WaveManager" type="Node" parent="."]
+script = ExtResource("1_wave")
+enemies_base_per_wave = 3
+enemies_per_skip_increase = 2
+enemies_total_cap = 20
+active_enemies_limit = 8
+spawn_interval = 1.2
+min_spawn_distance_from_player = 80.0
+ground_raycast_distance = 1000.0
+max_spawn_attempts = 5
+soul_cost_per_wave = 3
+souls_required_to_win = 50
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HealthBar" parent="UI" instance=ExtResource("2_health")]
+anchors_preset = 2
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 52.0
+
+[node name="WaveLabel" type="Label" parent="UI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 50.0
+text = "Wave 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SoulLabel" type="Label" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -150.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 50.0
+text = "Souls: 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="WavePrompt" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+
+[node name="PromptBG" type="ColorRect" parent="UI/WavePrompt"]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.8)
+
+[node name="PromptLabel" type="Label" parent="UI/WavePrompt"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -60.0
+offset_right = 180.0
+offset_bottom = -20.0
+text = "Wave cleared! Pay souls to continue?"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ButtonContainer" type="HBoxContainer" parent="UI/WavePrompt"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = 10.0
+offset_right = 100.0
+offset_bottom = 50.0
+
+[node name="PayButton" type="Button" parent="UI/WavePrompt/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Pay"
+
+[node name="SkipButton" type="Button" parent="UI/WavePrompt/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Skip"
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="SpawnPoint1" type="Node2D" parent="SpawnPoints"]
+position = Vector2(-200, 0)
+
+[node name="SpawnPoint2" type="Node2D" parent="SpawnPoints"]
+position = Vector2(400, 0)
+
+[node name="SpawnPoint3" type="Node2D" parent="SpawnPoints"]
+position = Vector2(-300, -50)
+
+[node name="SpawnPoint4" type="Node2D" parent="SpawnPoints"]
+position = Vector2(500, -50)
+
+[node name="SpawnPoint5" type="Node2D" parent="SpawnPoints"]
+position = Vector2(-150, 50)
+
+[node name="SpawnPoint6" type="Node2D" parent="SpawnPoints"]
+position = Vector2(350, 50)

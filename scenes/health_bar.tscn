@@ -1,0 +1,68 @@
+[gd_scene load_steps=5 format=3 uid="uid://bqm8x7y4n5k2p"]
+
+[ext_resource type="Texture2D" path="res://assets/HealthBar/antihero-healthbar_Background.png" id="1_bg"]
+[ext_resource type="Texture2D" path="res://assets/HealthBar/antihero-healthbar_Health.png" id="2_health"]
+[ext_resource type="Texture2D" path="res://assets/HealthBar/antihero-healthbar_Icon White.png" id="3_icon"]
+[ext_resource type="Script" path="res://scripts/health_bar.gd" id="4_script"]
+
+[node name="HealthBar" type="Control"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 200.0
+offset_bottom = 32.0
+script = ExtResource("4_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_bg")
+stretch_mode = 1
+
+[node name="HealthFill" type="TextureProgressBar" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = -4.0
+value = 100.0
+texture_progress = ExtResource("2_health")
+
+[node name="Icon" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -12.0
+offset_right = 0.0
+offset_bottom = 12.0
+texture = ExtResource("3_icon")
+stretch_mode = 4
+
+[node name="HealthLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -12.0
+offset_right = 20.0
+offset_bottom = 12.0
+text = "5/5"
+horizontal_alignment = 1
+vertical_alignment = 1
