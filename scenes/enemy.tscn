@@ -155,7 +155,7 @@ animations = [{
 radius = 8.0
 height = 16.0
 
-[node name="CharacterBody2D" type="CharacterBody2D" groups=["enemy"]]
+[node name="CharacterBody2D2" type="CharacterBody2D" groups=["enemy"]]
 position = Vector2(1, -12)
 script = ExtResource("1_qukd2")
 move_speed = 120.0
@@ -171,5 +171,20 @@ animation = &"idle"
 frame_progress = 0.161927
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1, 6)
+shape = SubResource("CapsuleShape2D_empvv")
+
+[node name="EnemyHurtbox" type="Area2D" parent="."]
+collision_layer = 8
+
+[node name="EnemyHurtboxShape" type="CollisionShape2D" parent="EnemyHurtbox"]
+position = Vector2(-1, 6)
+shape = SubResource("CapsuleShape2D_empvv")
+
+[node name="EnemyAttackArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 2
+
+[node name="EnemyAttackShape" type="CollisionShape2D" parent="EnemyAttackArea"]
 position = Vector2(-1, 6)
 shape = SubResource("CapsuleShape2D_empvv")

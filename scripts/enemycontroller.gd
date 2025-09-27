@@ -68,6 +68,23 @@ func _physics_process(delta: float) -> void:
 	
 	# Move and slide
 	move_and_slide()
+	
+	# Check if stuck against wall and change direction
+	if is_on_wall():
+		_facing *= -1
+		_time_left = change_dir_time  # Reset direction timer
+	
+	# Check if at edge of platform and change direction
+	if is_on_floor():
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsRayQueryParameters2D.create(
+			global_position + Vector2(_facing * 20, 10), 
+			global_position + Vector2(_facing * 20, 50)
+		)
+		var result = space_state.intersect_ray(query)
+		if not result:  # No ground ahead, turn around
+			_facing *= -1
+			_time_left = change_dir_time
 	_update_animation()
 
 func _update_animation() -> void:
@@ -126,7 +143,7 @@ func enemy_attack() -> void:
 	for player in players:
 		if player and player.has_method("take_damage"):
 			var distance = global_position.distance_to(player.global_position)
-			if distance < 50.0:  # Attack range
+			if distance < 30.0:  # Reduced attack range - must be very close
 				player.take_damage(attack_damage)
 				break
 
@@ -139,7 +156,7 @@ func _check_for_player_attack() -> void:
 	for player in players:
 		if player:
 			var distance = global_position.distance_to(player.global_position)
-			if distance < 40.0:  # Close range auto-attack
+			if distance < 25.0:  # Reduced attack range - enemies must be very close
 				enemy_attack()
 				break
 

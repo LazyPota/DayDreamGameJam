@@ -6,7 +6,7 @@ extends Node
 @export var enemies_total_cap: int = 50
 @export var active_enemies_limit: int = 10
 @export var spawn_interval: float = 0.6
-@export var min_spawn_distance_from_player: float = 96.0
+@export var min_spawn_distance_from_player: float = 150.0
 @export var ground_raycast_distance: float = 2000.0
 @export var max_spawn_attempts: int = 6
 
@@ -37,6 +37,31 @@ var _spawn_points: Array[Node2D] = []
 var _spawn_timer: Timer
 
 @onready var player = get_node_or_null(player_path)
+
+func _find_player() -> Node:
+	# Try multiple ways to find the player
+	if player:
+		return player
+	
+	# Try to find player by group
+	var players = get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		player = players[0]
+		return player
+	
+	# Try direct path
+	player = get_node_or_null("../player")
+	if player:
+		return player
+	
+	# Try searching in parent
+	var parent = get_parent()
+	if parent:
+		player = parent.get_node_or_null("player")
+		if player:
+			return player
+	
+	return null
 @onready var spawns = get_node_or_null(spawns_path)
 @onready var ui_label: Label = get_node_or_null("../UI/WavePrompt/PromptLabel")
 @onready var ui_prompt: Control = get_node_or_null("../UI/WavePrompt")
@@ -45,28 +70,44 @@ var _spawn_timer: Timer
 @onready var wave_counter_label: Label = get_node_or_null("../UI/WaveLabel")
 @onready var soul_counter_label: Label = get_node_or_null("../UI/SoulLabel")
 @onready var health_bar: Control = get_node_or_null("../UI/HealthBar")
-
 func _ready() -> void:
+	print("Wave Manager starting up...")
+	
+	# Try to find player immediately
+	var found_player = _find_player()
+	if found_player:
+		print("Player found: ", found_player.name)
+	else:
+		print("Player NOT found during ready!")
+		print("Player path: ", player_path)
+	
 	# Cache spawn points
 	if spawns:
 		for c in spawns.get_children():
 			if c is Node2D:
 				_spawn_points.append(c)
-	# Spawn timer
+	print("Found ", _spawn_points.size(), " spawn points")
+	print("Enemy scenes available: ", enemy_scenes.size())
+	
+	# Create spawn timer
 	_spawn_timer = Timer.new()
 	_spawn_timer.one_shot = false
 	_spawn_timer.wait_time = spawn_interval
 	add_child(_spawn_timer)
 	_spawn_timer.timeout.connect(_on_spawn_tick)
+	
+	# Add a longer delay before starting the first wave to let player get ready
+	var start_delay = Timer.new()
+	start_delay.wait_time = 5.0  # 5 second delay before first wave
+	start_delay.one_shot = true
+	add_child(start_delay)
+	start_delay.timeout.connect(_start_first_wave)
+	start_delay.start()
+	
+	# Show a message to the player
+	_show_message("Get ready! First wave starts in 5 seconds...", false)
 
-	# FIXED: Corrected indentation and added a null check
-	# UI wiring
-	if ui_prompt:
-		ui_prompt.visible = false
-		if ui_pay_button and not ui_pay_button.pressed.is_connected(_on_pay_pressed):
-			ui_pay_button.pressed.connect(_on_pay_pressed)
-		if ui_skip_button and not ui_skip_button.pressed.is_connected(_on_skip_pressed):
-			ui_skip_button.pressed.connect(_on_skip_pressed)
+	# UI prompt system disabled - using automatic wave progression
 	
 	# Connect player health to health bar
 	if player and health_bar:
@@ -75,7 +116,7 @@ func _ready() -> void:
 	
 	_update_wave_counter_label()
 	_update_soul_counter_label()
-	_start_next_wave()
+	# Don't start wave immediately - wait for the delay timer
 
 func _start_next_wave() -> void:
 	if souls >= souls_required_to_win:
@@ -93,6 +134,11 @@ func _start_next_wave() -> void:
 		player.equip_weapon_random()
 	_update_wave_counter_label()
 	_spawn_timer.start()
+
+func _start_first_wave() -> void:
+	# Start the first wave after delay
+	print("Starting first wave!")
+	_start_next_wave()
 
 func _on_spawn_tick() -> void:
 	# Safety check to prevent runaway spawning
@@ -115,34 +161,47 @@ func _on_spawn_tick() -> void:
 	_spawn_enemy()
 
 func _spawn_enemy() -> void:
-	# Pick a spawn far enough from the player and project to ground
-	var spawn_node := _pick_spawn_position()
-	if spawn_node == null:
-		return
-	var spawn_pos: Vector2 = _compute_grounded_position(spawn_node)
-	
-	# Randomly choose enemy type
-	var enemy_scene: PackedScene = null
-	if enemy_scenes.size() > 0:
-		enemy_scene = enemy_scenes[randi() % enemy_scenes.size()]
-	else:
-		print("No enemy scenes available!")
+	# Spawn enemy 5 feet (150 pixels) away from player
+	var current_player = _find_player()
+	if not current_player:
+		print("Warning: No player found!")
+		print("Tried player_path: ", player_path)
+		print("Available groups: ", get_tree().get_groups())
 		return
 	
-	var enemy := enemy_scene.instantiate()
-	if enemy == null:
-		print("Failed to instantiate enemy scene")
+	print("Spawning enemy 5 feet from player...")
+	var player_pos = current_player.global_position
+	
+	# Spawn 5 feet to the RIGHT of the player (constant position)
+	var distance = 150  # 5 feet in pixels
+	var spawn_pos = Vector2(
+		player_pos.x + distance,  # Always to the right
+		player_pos.y  # Same height as player
+	)
+	
+	print("Player position: ", player_pos)
+	print("Spawn position: ", spawn_pos)
+	
+	# Pick random enemy type
+	var enemy_scene = enemy_scenes[randi() % enemy_scenes.size()]
+	var enemy_inst = enemy_scene.instantiate()
+	if enemy_inst == null:
+		print("Warning: Failed to instantiate enemy!")
 		return
-	get_tree().current_scene.add_child(enemy)
-	enemy.global_position = spawn_pos
+	
 	# Apply stat multiplier
-	if enemy.has_method("set_stat_multiplier"):
-		enemy.set_stat_multiplier(stat_multiplier)
-	elif enemy.has_method("apply_stat_multiplier"):
-		enemy.apply_stat_multiplier(stat_multiplier)
+	if enemy_inst.has_method("apply_stat_multiplier"):
+		enemy_inst.apply_stat_multiplier(stat_multiplier)
+	
 	# Connect death signal
-	if enemy.has_signal("died"):
-		enemy.died.connect(_on_enemy_died)
+	if enemy_inst.has_signal("died") and not enemy_inst.died.is_connected(_on_enemy_died):
+		enemy_inst.died.connect(_on_enemy_died)
+	
+	# Add to scene and position
+	get_parent().add_child(enemy_inst)
+	enemy_inst.global_position = spawn_pos
+	print("Enemy spawned! Alive enemies: ", _alive_enemies + 1, " Spawned this wave: ", _spawned_in_wave + 1)
+	
 	_alive_enemies += 1
 	_spawned_in_wave += 1
 
@@ -150,20 +209,23 @@ func _on_wave_cleared() -> void:
 	if souls >= souls_required_to_win:
 		_show_message("You have collected %d life souls. You win!" % souls, false)
 		return
-	_show_prompt()
+	
+	# Automatic wave progression: give 3 souls or add 5 more enemies
+	if souls >= 3:
+		# Player has enough souls, consume 3 and continue normally
+		souls -= 3
+		_show_message("Wave cleared! Used 3 souls to keep difficulty normal.", true)
+		_update_soul_counter_label()
+		_start_next_wave()
+	else:
+		# Player doesn't have enough souls, add 5 more enemies
+		next_wave_extra += 5
+		_show_message("Not enough souls! Next wave will have 5 more enemies.", true)
+		_start_next_wave()
+	
 	_update_wave_counter_label()
 
-func _show_prompt() -> void:
-	if not ui_prompt:
-		# No UI, auto decision: prefer pay if can, else skip
-		if souls >= soul_cost_per_wave:
-			_consume_souls_and_continue()
-		else:
-			_apply_skip_consequence()
-		return
-	if ui_label:
-		ui_label.text = "Wave %d cleared! Souls: %d\nPay %d life souls to keep difficulty?" % [current_wave, souls, soul_cost_per_wave]
-	ui_prompt.visible = true
+# Old UI prompt system removed - now using automatic progression
 
 func _on_enemy_died(dropped_soul: bool) -> void:
 	if dropped_soul:
@@ -189,12 +251,18 @@ func _pick_spawn_position() -> Node2D:
 		var spawn_pos = spawn_point.global_position
 		var too_close = false
 		
-		# Check distance to existing enemies
+		# Check distance to existing enemies and player
 		var enemies = get_tree().get_nodes_in_group("enemy")
 		for enemy in enemies:
 			if enemy.global_position.distance_to(spawn_pos) < 64.0:  # 64 pixels minimum distance
 				too_close = true
 				break
+		
+		# Also check distance to player
+		if not too_close and player:
+			var distance_to_player = player.global_position.distance_to(spawn_pos)
+			if distance_to_player < min_spawn_distance_from_player:
+				too_close = true
 		
 		if not too_close:
 			return spawn_point
@@ -219,33 +287,17 @@ func _compute_grounded_position(node: Node2D) -> Vector2:
 	# Fallback to original position if no ground found
 	return Vector2(from.x, from.y - 16.0)
 
-func _on_pay_pressed() -> void:
-	if souls >= soul_cost_per_wave:
-		_consume_souls_and_continue()
-	else:
-		_apply_skip_consequence()
-
-func _on_skip_pressed() -> void:
-	_apply_skip_consequence()
-
-func _consume_souls_and_continue() -> void:
-	souls -= soul_cost_per_wave
-	# No extra enemies added
-	_start_next_wave()
-
-func _apply_skip_consequence() -> void:
-	# Add +5 enemies next wave, cap at total cap
-	next_wave_extra = min(enemies_total_cap - enemies_base_per_wave, next_wave_extra + enemies_per_skip_increase)
-	# If already at cap and couldn't/didn't pay, increase enemy stats
-	if enemies_base_per_wave + next_wave_extra >= enemies_total_cap:
-		stat_multiplier *= 2.0
-	_start_next_wave()
+# Old UI button functions removed - now using automatic progression
 
 func _show_message(text: String, auto_hide: bool = true) -> void:
 	print("Wave Manager: ", text)
 	if auto_hide:
 		# Could add a timer here to hide after some seconds
 		pass
+
+func _hide_message() -> void:
+	# Message hiding functionality (currently just prints)
+	pass
 
 func _update_wave_counter_label() -> void:
 	if wave_counter_label:

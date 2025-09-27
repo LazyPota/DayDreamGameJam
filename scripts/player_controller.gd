@@ -17,13 +17,13 @@ signal health_changed(current_health: int, max_health: int)
 @export var input_jump: StringName = &"ui_accept" # Space (default Godot Input Map)
 
 # Roll
-@export var roll_speed: float = 220.0
+@export var roll_speed: float = 300.0
 @export var roll_duration: float = 0.35
 @export var roll_cooldown: float = 0.50
 @export var invincible_during_roll: bool = true
 
 # Health
-@export var max_health: int = 3
+@export var max_health: int = 10
 
 # Input actions (configure in Project Settings > Input Map)
 @export var input_left: StringName = &"ui_left"
@@ -63,6 +63,7 @@ var _dead: bool = false
 var roll_anim_name: StringName = &"roll"
 var _health_bonus: int = 0
 var _attack_cooldown_left: float = 0.0
+var _attack_hit_something: bool = false
 
 func _ready() -> void:
 	health = max_health
@@ -303,6 +304,9 @@ func attack() -> void:
 		return
 	_attack_cooldown_left = attack_cooldown
 	
+	# Reset attack hit tracker
+	_attack_hit_something = false
+	
 	# Temporarily disable player's hurtbox during attack to prevent self-damage
 	var hurtbox_was_monitoring = false
 	if hurtbox:
@@ -384,18 +388,26 @@ func _on_attack_hitbox_area_entered(area: Area2D) -> void:
 	if parent and parent.is_in_group("enemy") and parent != self:
 		if parent.has_method("take_damage"):
 			var damage_amount = 1
-			if weapon and weapon.has_property("damage"):
+			if weapon and "damage" in weapon:
 				damage_amount = weapon.damage
 			parent.take_damage(damage_amount)
+			
+			# Mark that we hit something and heal player
+			_attack_hit_something = true
+			heal(damage_amount)  # Heal same amount as damage dealt
 
 func _on_attack_hitbox_body_entered(body: Node) -> void:
 	# Make sure we don't damage ourselves or other players
 	if body and body.is_in_group("enemy") and body != self:
 		if body.has_method("take_damage"):
 			var damage_amount = 1
-			if weapon and weapon.has_property("damage"):
+			if weapon and "damage" in weapon:
 				damage_amount = weapon.damage
 			body.take_damage(damage_amount)
+			
+			# Mark that we hit something and heal player
+			_attack_hit_something = true
+			heal(damage_amount)  # Heal same amount as damage dealt
 
 func _disable_attack_hitbox(timer: Timer, restore_hurtbox_monitoring: bool = true) -> void:
 	if attack_hitbox:
@@ -404,6 +416,14 @@ func _disable_attack_hitbox(timer: Timer, restore_hurtbox_monitoring: bool = tru
 	# Re-enable hurtbox after attack
 	if hurtbox and restore_hurtbox_monitoring:
 		hurtbox.monitoring = true
+	
+	# If player didn't hit anything, they take damage (risk/reward system)
+	if not _attack_hit_something:
+		var attack_cost = 1
+		if weapon and "damage" in weapon:
+			attack_cost = weapon.damage
+		take_damage(attack_cost)
+		print("Attack missed! Lost ", attack_cost, " health")
 	
 	if timer:
 		timer.queue_free()

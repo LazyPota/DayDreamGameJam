@@ -1,7 +1,7 @@
 [gd_scene load_steps=27 format=3 uid="uid://c8qu5jlnvom0f"]
 
 [ext_resource type="Script" uid="uid://caygpj7jgcopu" path="res://scripts/enemycontroller.gd" id="1_tw7dw"]
-[ext_resource type="Texture2D" uid="uid://d1y1ep0iu47lm" path="res://assets/bat_spritesheet(80x80).png" id="2_tw7dw"]
+[ext_resource type="Texture2D" uid="uid://d1y1ep0iu47lm" path="res://sprite/bat_spritesheet(80x80).png" id="2_tw7dw"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6jf5w"]
 atlas = ExtResource("2_tw7dw")
@@ -174,7 +174,7 @@ animations = [{
 radius = 19.0
 height = 38.0
 
-[node name="CharacterBody2D" type="CharacterBody2D" groups=["enemy"]]
+[node name="CharacterBody2D2" type="CharacterBody2D" groups=["enemy"]]
 position = Vector2(1, -12)
 script = ExtResource("1_tw7dw")
 move_speed = 120.0
@@ -190,5 +190,20 @@ animation = &"new_animation"
 frame_progress = 0.971329
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, -6)
+shape = SubResource("CapsuleShape2D_empvv")
+
+[node name="EnemyHurtbox" type="Area2D" parent="."]
+collision_layer = 8
+
+[node name="EnemyHurtboxShape" type="CollisionShape2D" parent="EnemyHurtbox"]
+position = Vector2(1, -6)
+shape = SubResource("CapsuleShape2D_empvv")
+
+[node name="EnemyAttackArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 2
+
+[node name="EnemyAttackShape" type="CollisionShape2D" parent="EnemyAttackArea"]
 position = Vector2(1, -6)
 shape = SubResource("CapsuleShape2D_empvv")

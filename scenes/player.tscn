@@ -404,19 +404,22 @@ frame = 3
 frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-1, 2)
+position = Vector2(1, 1)
 shape = SubResource("CapsuleShape2D_empvv")
 
 [node name="Hurtbox" type="Area2D" parent="."]
-position = Vector2(15, 0)
+position = Vector2(13, -3)
+collision_layer = 2
+collision_mask = 4
 
 [node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(-1, 2)
+position = Vector2(-13, 3)
 shape = SubResource("CapsuleShape2D_empvv")
 
 [node name="AttackHitbox" type="Area2D" parent="."]
 position = Vector2(6, 0)
+collision_mask = 8
 
 [node name="AttackHitboxShape" type="CollisionShape2D" parent="AttackHitbox"]
-position = Vector2(8, 2)
+position = Vector2(13, 1)
 shape = SubResource("CapsuleShape2D_empvv")

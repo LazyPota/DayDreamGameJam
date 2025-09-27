@@ -1,10 +1,9 @@
-[gd_scene load_steps=30 format=3 uid="uid://dl2b1vqvkohc4"]
+[gd_scene load_steps=29 format=3 uid="uid://dl2b1vqvkohc4"]
 
 [ext_resource type="Texture2D" uid="uid://xg7d2rnus27i" path="res://sprite/knight.png" id="1_fqpgx"]
 [ext_resource type="Texture2D" uid="uid://12uewh4qa37m" path="res://sprite/platformer_asset_pack_tileset.png" id="2_5241x"]
 [ext_resource type="PackedScene" uid="uid://bljeo53dc8tee" path="res://scenes/player.tscn" id="2_doyfm"]
 [ext_resource type="Texture2D" uid="uid://b48nima2tsxmm" path="res://sprite/world_tileset.png" id="2_sgtrg"]
-[ext_resource type="PackedScene" uid="uid://j42bi4d38xwg" path="res://scenes/enemy.tscn" id="3_sgtrg"]
 [ext_resource type="PackedScene" uid="uid://c5h8k2nap3r6v" path="res://scenes/game_manager.tscn" id="4_game"]
 [ext_resource type="Texture2D" uid="uid://dnfgo443gpglk" path="res://sprite/ParallaxCave1.png" id="4_pvyom"]
 [ext_resource type="Texture2D" uid="uid://dpa6kdwcr2jtv" path="res://sprite/ParallaxCave2.png" id="5_cdkyp"]
@@ -22338,33 +22337,9 @@ layer_0/tile_data = PackedInt32Array(0, 1245193, 24, 65536, 1245193, 25, 1, 1310
 position = Vector2(89, -52)
 scale = Vector2(1.3, 1.3)
 
-[node name="enemy" parent="." instance=ExtResource("3_sgtrg")]
-position = Vector2(221, -32)
-
 [node name="GameManager" parent="." instance=ExtResource("4_game")]
 
 [node name="SpawnPoints" type="Node2D" parent="."]
 
 [node name="SpawnPoint1" type="Node2D" parent="SpawnPoints"]
-position = Vector2(487, -141)
-
-[node name="SpawnPoint2" type="Node2D" parent="SpawnPoints"]
-position = Vector2(617, -285)
-
-[node name="SpawnPoint3" type="Node2D" parent="SpawnPoints"]
-position = Vector2(770, -210)
-
-[node name="SpawnPoint4" type="Node2D" parent="SpawnPoints"]
-position = Vector2(560, -138)
-
-[node name="SpawnPoint5" type="Node2D" parent="SpawnPoints"]
-position = Vector2(785, -292)
-
-[node name="SpawnPoint6" type="Node2D" parent="SpawnPoints"]
-position = Vector2(425, -182)
-
-[node name="SpawnPoint7" type="Node2D" parent="SpawnPoints"]
-position = Vector2(233, -103)
-
-[node name="SpawnPoint8" type="Node2D" parent="SpawnPoints"]
-position = Vector2(300, -100)
+position = Vector2(149, -236)
