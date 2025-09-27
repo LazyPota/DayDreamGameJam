@@ -1,0 +1,28 @@
+# Godot 4 specific ignores
+.godot/
+
+# Godot 3 specific ignores (good to have just in case)
+.import/
+export_presets.cfg
+
+# Mono/C# specific (if you were using it)
+.mono/
+
+# General build artifacts
+build/
+dist/
+
+# AssetStore/Plugin related
+addons/
+
+# User-specific settings
+*.user
+*.tres.user
+
+# Exported game files
+*.pck
+*.zip
+*.exe
+*.dmg
+*.apk
+*.aab
